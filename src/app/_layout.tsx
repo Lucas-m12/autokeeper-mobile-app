@@ -11,6 +11,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
 import { colors } from '@/constants/theme';
+import { useAuthStore } from '@/stores/auth-store';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -22,16 +23,19 @@ export default function RootLayout() {
     Montserrat_700Bold,
   });
 
-  // TODO: Replace with useAuthStore() from stores/auth-store.ts
-  const isAuthenticated = false;
+  const { isAuthenticated, isLoading, restoreSession } = useAuthStore();
 
   useEffect(() => {
-    if (fontsLoaded) {
+    restoreSession();
+  }, [restoreSession]);
+
+  useEffect(() => {
+    if (fontsLoaded && !isLoading) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded]);
+  }, [fontsLoaded, isLoading]);
 
-  if (!fontsLoaded) return null;
+  if (!fontsLoaded || isLoading) return null;
 
   return (
     <>

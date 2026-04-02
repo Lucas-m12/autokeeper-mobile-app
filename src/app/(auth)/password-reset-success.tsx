@@ -1,35 +1,10 @@
 import { View, Text, StyleSheet, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import Svg, { Path } from 'react-native-svg';
 import { Button } from '@/components/button';
 import { SuccessCheck } from '@/features/auth/components/success-check';
 import { AmbientGlow } from '@/features/auth/components/auth-decorations';
-
-function LoginArrowIcon() {
-  return (
-    <Svg width={18} height={18} viewBox="0 0 24 24">
-      <Path
-        d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"
-        stroke="white"
-        strokeWidth={2}
-        fill="none"
-      />
-      <Path
-        d="M10 17l5-5-5-5"
-        stroke="white"
-        strokeWidth={2}
-        fill="none"
-      />
-      <Path
-        d="M15 12H3"
-        stroke="white"
-        strokeWidth={2}
-        fill="none"
-      />
-    </Svg>
-  );
-}
+import { LoginArrowIcon } from '@/features/auth/components/icons';
 
 export default function PasswordResetSuccessScreen() {
   const router = useRouter();
@@ -53,7 +28,7 @@ export default function PasswordResetSuccessScreen() {
           <Button
             variant="primary"
             label="Ir para o login"
-            icon={<LoginArrowIcon />}
+            icon={<LoginArrowIcon size={18} />}
             onPress={() => router.replace('/login')}
           />
         </View>

@@ -28,7 +28,7 @@ export default function OtpScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <AmbientGlow variant="center" />
-      <OtpDeco />
+      <OtpDeco variant={isRegister ? 'register' : 'forgot'} />
 
       <View style={styles.header}>
         <Button variant="back" onPress={router.back} />

@@ -6,6 +6,7 @@ import { toStoredFormat, toDisplayFormat } from '@/features/auth/utils/phone-mas
 
 export function useForgotPassword() {
   const router = useRouter();
+  const authStore = useAuthStore();
   const [phone, setPhone] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +26,7 @@ export function useForgotPassword() {
     setIsLoading(true);
     try {
       const stored = toStoredFormat(phone);
-      await useAuthStore.getState().requestPasswordReset(stored);
+      await authStore.requestPasswordReset(stored);
       router.push({
         pathname: '/otp',
         params: {
@@ -33,13 +34,12 @@ export function useForgotPassword() {
           phone: toDisplayFormat(stored),
         },
       });
-    } catch (err: unknown) {
-      const code = (err as { code?: string })?.code;
-      setError(getErrorMessage(code));
+    } catch (e) {
+      setError(getErrorMessage(e));
     } finally {
       setIsLoading(false);
     }
-  }, [phone, router]);
+  }, [phone, authStore, router]);
 
   return {
     phone,

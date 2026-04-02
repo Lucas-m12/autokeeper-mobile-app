@@ -11,6 +11,7 @@ interface FieldErrors {
 export function useNewPassword() {
   const router = useRouter();
   const { resetToken } = useLocalSearchParams<{ resetToken: string }>();
+  const authStore = useAuthStore();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -44,15 +45,14 @@ export function useNewPassword() {
 
     setIsLoading(true);
     try {
-      await useAuthStore.getState().resetPassword(resetToken!, password);
+      await authStore.resetPassword(resetToken!, password);
       router.replace('/password-reset-success');
-    } catch (err: unknown) {
-      const code = (err as { code?: string })?.code;
-      setFieldErrors({ password: getErrorMessage(code) });
+    } catch (e) {
+      setFieldErrors({ password: getErrorMessage(e) });
     } finally {
       setIsLoading(false);
     }
-  }, [password, confirmPassword, resetToken, router]);
+  }, [password, confirmPassword, resetToken, authStore, router]);
 
   return {
     password,

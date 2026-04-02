@@ -33,7 +33,7 @@ export function useOtp() {
     setError(null);
 
     try {
-      const result = await authStore.verifyOtp({ phone: phone!, code, flow: flow! });
+      const result = await authStore.verifyOtp(phone!, code, flow!);
       if (flow === 'register') {
         router.replace('/register-success');
       } else {
@@ -53,7 +53,7 @@ export function useOtp() {
 
   const handleResend = useCallback(async () => {
     try {
-      await authStore.resendOtp({ phone: phone!, flow: flow! });
+      await authStore.resendOtp(phone!, flow!);
       timer.resetTimer();
       setAttempts(0);
       setError(null);

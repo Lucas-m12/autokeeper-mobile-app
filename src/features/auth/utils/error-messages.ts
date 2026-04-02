@@ -9,6 +9,7 @@ export const errorMessages: Record<string, string> = {
   SERVER_ERROR: 'Algo deu errado. Tente novamente.',
 };
 
-export function getErrorMessage(code: string): string {
+export function getErrorMessage(error: unknown): string {
+  const code = (error as { code?: string })?.code ?? '';
   return errorMessages[code] ?? errorMessages.SERVER_ERROR;
 }

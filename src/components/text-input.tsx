@@ -145,6 +145,11 @@ const styles = StyleSheet.create({
   inputContainerFocused: {
     borderColor: colors.accent.teal,
     backgroundColor: 'rgba(20,184,166,0.03)',
+    shadowColor: '#14b8a6',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.06,
+    shadowRadius: 3,
+    elevation: 1,
   },
   inputContainerError: {
     borderColor: colors.status.error,

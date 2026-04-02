@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { colors, shadows } from '@/constants/theme';
 
@@ -100,9 +101,39 @@ export function Button({
   const resolvedFullWidth =
     fullWidth !== undefined ? fullWidth : variant === 'primary' || variant === 'outline';
 
+  if (variant === 'primary') {
+    return (
+      <Pressable
+        onPress={onPress}
+        onPressIn={() => setPressed(true)}
+        onPressOut={() => setPressed(false)}
+        style={[
+          pressed && styles.primaryPressed,
+          resolvedFullWidth && styles.fullWidth,
+          isDisabled && styles.disabled,
+        ]}
+        disabled={isDisabled}
+      >
+        <LinearGradient
+          colors={['#14b8a6', '#0d9488']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.primary, resolvedFullWidth && styles.fullWidth]}
+        >
+          {loading ? (
+            <ActivityIndicator color="#ffffff" size="small" />
+          ) : (
+            <View style={styles.content}>
+              {icon && <View style={styles.primaryIcon}>{icon}</View>}
+              {label && <Text style={styles.primaryLabel}>{label}</Text>}
+            </View>
+          )}
+        </LinearGradient>
+      </Pressable>
+    );
+  }
+
   const containerStyle = [
-    variant === 'primary' && styles.primary,
-    variant === 'primary' && pressed && styles.primaryPressed,
     variant === 'outline' && styles.outline,
     variant === 'outline' && pressed && styles.outlinePressed,
     variant === 'social' && styles.social,
@@ -112,7 +143,6 @@ export function Button({
   ];
 
   const labelStyle = [
-    variant === 'primary' && styles.primaryLabel,
     variant === 'outline' && styles.outlineLabel,
     variant === 'social' && styles.socialLabel,
   ];
@@ -126,10 +156,7 @@ export function Button({
       disabled={isDisabled}
     >
       {loading ? (
-        <ActivityIndicator
-          color={variant === 'primary' ? '#ffffff' : colors.text.secondary}
-          size="small"
-        />
+        <ActivityIndicator color={colors.text.secondary} size="small" />
       ) : (
         <View style={styles.content}>
           {icon && <View style={variant === 'social' ? styles.socialIcon : undefined}>{icon}</View>}
@@ -159,9 +186,10 @@ const styles = StyleSheet.create({
   primary: {
     height: 54,
     borderRadius: 14,
-    backgroundColor: '#0fa89a',
     alignItems: 'center',
     justifyContent: 'center',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.1)',
     ...shadows.primaryButton,
   },
   primaryPressed: {
@@ -173,6 +201,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#ffffff',
+  },
+  primaryIcon: {
+    marginRight: 10,
   },
   outline: {
     height: 54,

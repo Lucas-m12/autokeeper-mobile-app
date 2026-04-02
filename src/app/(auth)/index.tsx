@@ -8,6 +8,7 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect } from 'react';
 
 import { SplashGauge } from '@/features/auth/components/splash-gauge';
@@ -69,7 +70,14 @@ function ProgressBar() {
   return (
     <Animated.View style={[styles.progressContainer, containerStyle]}>
       <View style={styles.progressTrack}>
-        <Animated.View style={[styles.progressFill, fillStyle]} />
+        <Animated.View style={[styles.progressFill, fillStyle]}>
+          <LinearGradient
+            colors={['#14b8a6', '#e8a838']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={StyleSheet.absoluteFill}
+          />
+        </Animated.View>
       </View>
     </Animated.View>
   );
@@ -192,8 +200,8 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-    backgroundColor: TEAL,
     borderRadius: 3,
+    overflow: 'hidden',
   },
   tapHintContainer: {
     position: 'absolute',

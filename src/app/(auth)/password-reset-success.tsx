@@ -13,7 +13,7 @@ export default function PasswordResetSuccessScreen() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
 
-      <AmbientGlow variant="center" color="rgba(16,185,129,0.04)" />
+      <AmbientGlow variant="center" style={{ backgroundColor: 'rgba(16,185,129,0.04)' }} />
 
       <View style={styles.body}>
         <SuccessCheck variant="green" />

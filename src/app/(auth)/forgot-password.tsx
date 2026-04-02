@@ -68,7 +68,7 @@ export default function ForgotPasswordScreen() {
           label="CELULAR CADASTRADO"
           value={phone}
           onChangeText={setPhone}
-          error={isPhoneError ? error : undefined}
+          error={isPhoneError ? error ?? undefined : undefined}
         />
 
         <View style={styles.button}>

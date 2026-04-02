@@ -1,8 +1,17 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import { useRef } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  Pressable,
+  KeyboardAvoidingView,
+  Platform,
+  type TextInput as RNTextInputType,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { colors, spacing, typography, radius } from '@/constants/theme';
+import { Controller } from 'react-hook-form';
 import { Button } from '@/components/button';
 import { TextInput } from '@/components/text-input';
 import { PhoneInput } from '@/features/auth/components/phone-input';
@@ -14,19 +23,13 @@ import { useRegister } from '@/features/auth/hooks/use-register';
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const {
-    name,
-    phone,
-    password,
-    confirmPassword,
-    isLoading,
-    fieldErrors,
-    handleNameChange,
-    handlePhoneChange,
-    handlePasswordChange,
-    handleConfirmPasswordChange,
-    handleRegister,
-  } = useRegister();
+  const { form, handleRegister, isLoading } = useRegister();
+
+  const phoneRef = useRef<RNTextInputType>(null);
+  const passwordRef = useRef<RNTextInputType>(null);
+  const confirmPasswordRef = useRef<RNTextInputType>(null);
+
+  const password = form.watch('password');
 
   return (
     <SafeAreaView style={styles.container}>
@@ -34,79 +37,132 @@ export default function RegisterScreen() {
       <AmbientGlow variant="amber" />
       <GaugeArc screen="register" />
 
-      <View style={styles.header}>
-        <Button variant="back" onPress={router.back} />
-      </View>
-
-      <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
-        <AuthIcon variant="teal">
-          <UserPlusIcon />
-        </AuthIcon>
-
-        <Text style={styles.title}>Criar sua conta</Text>
-        <Text style={styles.subtitle}>
-          É rápido e gratuito. Vamos verificar seu celular para começar.
-        </Text>
-
-        <TextInput
-          label="NOME COMPLETO"
-          value={name}
-          onChangeText={handleNameChange}
-          placeholder="Seu nome"
-          icon={<PersonIcon size={18} />}
-          error={fieldErrors.name}
-        />
-
-        <PhoneInput
-          label="CELULAR"
-          value={phone}
-          onChangeText={handlePhoneChange}
-          error={fieldErrors.phone}
-        />
-
-        <TextInput
-          label="SENHA"
-          value={password}
-          onChangeText={handlePasswordChange}
-          secureTextEntry
-          placeholder="Mínimo 8 caracteres"
-          icon={<LockIcon size={18} />}
-          error={fieldErrors.password}
-        />
-        <PasswordStrength password={password} />
-
-        <TextInput
-          label="CONFIRMAR SENHA"
-          value={confirmPassword}
-          onChangeText={handleConfirmPasswordChange}
-          secureTextEntry
-          placeholder="Repita a senha"
-          icon={<LockIcon size={18} />}
-          error={fieldErrors.confirmPassword}
-        />
-
-        <View style={styles.submitButton}>
-          <Button
-            variant="primary"
-            label="Criar conta"
-            onPress={handleRegister}
-            loading={isLoading}
-          />
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={styles.header}>
+          <Button variant="back" onPress={router.back} />
         </View>
 
-        <Text style={styles.termsText}>
-          Ao criar uma conta, você concorda com os{'\n'}
-          <Text style={styles.termsLink}>Termos de Uso</Text> e{' '}
-          <Text style={styles.termsLink}>Política de Privacidade</Text>
-        </Text>
-      </ScrollView>
+        <ScrollView
+          style={styles.body}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          contentContainerStyle={styles.bodyContent}
+        >
+          <AuthIcon variant="teal">
+            <UserPlusIcon />
+          </AuthIcon>
 
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>Já tem conta? </Text>
-        <Pressable onPress={() => router.push('/login')}>
-          <Text style={styles.footerLink}>Entrar</Text>
-        </Pressable>
-      </View>
+          <Text style={styles.title}>Criar sua conta</Text>
+          <Text style={styles.subtitle}>
+            É rápido e gratuito. Vamos verificar seu celular para começar.
+          </Text>
+
+          <Controller
+            control={form.control}
+            name="name"
+            render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+              <TextInput
+                label="NOME COMPLETO"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder="Seu nome"
+                icon={<PersonIcon size={18} />}
+                error={error?.message}
+                returnKeyType="next"
+                submitBehavior="submit"
+                onSubmitEditing={() => phoneRef.current?.focus()}
+              />
+            )}
+          />
+
+          <Controller
+            control={form.control}
+            name="phone"
+            render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+              <PhoneInput
+                ref={phoneRef}
+                label="CELULAR"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={error?.message}
+                returnKeyType="next"
+                submitBehavior="submit"
+                onSubmitEditing={() => passwordRef.current?.focus()}
+              />
+            )}
+          />
+
+          <Controller
+            control={form.control}
+            name="password"
+            render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+              <TextInput
+                ref={passwordRef}
+                label="SENHA"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                secureTextEntry
+                placeholder="Mínimo 8 caracteres"
+                icon={<LockIcon size={18} />}
+                error={error?.message}
+                returnKeyType="next"
+                submitBehavior="submit"
+                onSubmitEditing={() => confirmPasswordRef.current?.focus()}
+              />
+            )}
+          />
+          <PasswordStrength password={password} />
+
+          <Controller
+            control={form.control}
+            name="confirmPassword"
+            render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+              <TextInput
+                ref={confirmPasswordRef}
+                label="CONFIRMAR SENHA"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                secureTextEntry
+                placeholder="Repita a senha"
+                icon={<LockIcon size={18} />}
+                error={error?.message}
+                returnKeyType="done"
+                onSubmitEditing={handleRegister}
+              />
+            )}
+          />
+
+          <View style={styles.submitButton}>
+            <Button
+              variant="primary"
+              label="Criar conta"
+              onPress={handleRegister}
+              loading={isLoading}
+            />
+          </View>
+
+          <Text style={styles.termsText}>
+            Ao criar uma conta, você concorda com os{'\n'}
+            <Text style={styles.termsLink}>Termos de Uso</Text> e{' '}
+            <Text style={styles.termsLink}>Política de Privacidade</Text>
+          </Text>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Já tem conta? </Text>
+            <Pressable onPress={() => router.push('/login')}>
+              <Text style={styles.footerLink}>Entrar</Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -115,6 +171,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#060a14',
+  },
+  flex: {
+    flex: 1,
   },
   header: {
     paddingHorizontal: 24,
@@ -126,6 +185,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingTop: 16,
     zIndex: 10,
+  },
+  bodyContent: {
+    paddingBottom: 20,
   },
   title: {
     fontSize: 25,
@@ -158,10 +220,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 30,
-    paddingBottom: 38,
-    zIndex: 10,
+    paddingTop: 20,
+    paddingBottom: 14,
   },
   footerText: {
     fontSize: 14,

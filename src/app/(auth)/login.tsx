@@ -1,32 +1,33 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
+import { useRef } from 'react';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  type TextInput as RNTextInputType,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { colors, spacing, typography, radius } from '@/constants/theme';
+import { Controller } from 'react-hook-form';
 import { Button } from '@/components/button';
-import { TextInput } from '@/components/text-input';
 import { Checkbox } from '@/components/checkbox';
 import { Divider } from '@/components/divider';
-import { PhoneInput } from '@/features/auth/components/phone-input';
+import { TextInput } from '@/components/text-input';
 import { AmbientGlow, GaugeArc } from '@/features/auth/components/auth-decorations';
 import { AuthIcon } from '@/features/auth/components/auth-icon';
-import { CarLockIcon, LockIcon, GoogleIcon, AppleIcon } from '@/features/auth/components/icons';
+import { AppleIcon, CarLockIcon, GoogleIcon, LockIcon } from '@/features/auth/components/icons';
+import { PhoneInput } from '@/features/auth/components/phone-input';
 import { useLogin } from '@/features/auth/hooks/use-login';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const {
-    phone,
-    password,
-    rememberMe,
-    isLoading,
-    error,
-    fieldErrors,
-    handlePhoneChange,
-    handlePasswordChange,
-    toggleRemember,
-    handleLogin,
-  } = useLogin();
+  const { form, rememberMe, toggleRemember, handleLogin, isLoading, error } =
+    useLogin();
+
+  const passwordRef = useRef<RNTextInputType>(null);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -34,71 +35,118 @@ export default function LoginScreen() {
       <AmbientGlow variant="amber" />
       <GaugeArc screen="login" />
 
-      <View style={styles.header}>
-        <Button variant="back" onPress={router.back} />
-      </View>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={styles.header}>
+          <Button variant="back" onPress={router.back} />
+        </View>
 
-      <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
-        <AuthIcon variant="amber">
-          <CarLockIcon />
-        </AuthIcon>
+        <ScrollView
+          style={styles.body}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          contentContainerStyle={styles.bodyContent}
+        >
+          <AuthIcon variant="amber">
+            <CarLockIcon />
+          </AuthIcon>
 
-        <Text style={styles.title}>Bem-vindo de volta</Text>
-        <Text style={styles.subtitle}>
-          Entre com seu celular para acessar seus veículos e lembretes.
-        </Text>
+          <Text style={styles.title}>Bem-vindo de volta</Text>
+          <Text style={styles.subtitle}>
+            Entre com seu celular para acessar seus veículos e lembretes.
+          </Text>
 
-        <PhoneInput
-          label="CELULAR"
-          value={phone}
-          onChangeText={handlePhoneChange}
-          error={fieldErrors.phone}
-        />
-
-        <TextInput
-          label="SENHA"
-          value={password}
-          onChangeText={handlePasswordChange}
-          secureTextEntry
-          placeholder="••••••••"
-          icon={<LockIcon size={18} />}
-          error={fieldErrors.password}
-        />
-
-        <View style={styles.formExtras}>
-          <Checkbox
-            label="Lembrar de mim"
-            checked={rememberMe}
-            onToggle={toggleRemember}
+          <Controller
+            control={form.control}
+            name="phone"
+            render={({ field: { onChange, onBlur, value }, fieldState: { error: fieldError } }) => (
+              <PhoneInput
+                label="CELULAR"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={fieldError?.message}
+                returnKeyType="next"
+                submitBehavior="submit"
+                onSubmitEditing={() => passwordRef.current?.focus()}
+              />
+            )}
           />
-          <Pressable onPress={() => router.push('/forgot-password')}>
-            <Text style={styles.forgotLink}>Esqueceu a senha?</Text>
-          </Pressable>
-        </View>
 
-        <Button
-          variant="primary"
-          label="Entrar"
-          onPress={handleLogin}
-          loading={isLoading}
-        />
+          <Controller
+            control={form.control}
+            name="password"
+            render={({ field: { onChange, onBlur, value }, fieldState: { error: fieldError } }) => (
+              <TextInput
+                ref={passwordRef}
+                label="SENHA"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                secureTextEntry
+                placeholder="••••••••"
+                icon={<LockIcon size={18} />}
+                error={fieldError?.message}
+                returnKeyType="done"
+                onSubmitEditing={handleLogin}
+              />
+            )}
+          />
 
-        {error && <Text style={styles.errorText}>{error}</Text>}
+          <View style={styles.formExtras}>
+            <Checkbox
+              label="Lembrar de mim"
+              checked={rememberMe}
+              onToggle={toggleRemember}
+            />
+            <Pressable onPress={() => router.push('/forgot-password')}>
+              <Text style={styles.forgotLink}>Esqueceu a senha?</Text>
+            </Pressable>
+          </View>
 
-        <Divider />
+          <Button
+            variant="primary"
+            label="Entrar"
+            onPress={handleLogin}
+            loading={isLoading}
+          />
 
-        <View style={styles.socialRow}>
-          <Button variant="social" icon={<GoogleIcon size={18} />} label="Google" onPress={() => {}} />
-          <Button variant="social" icon={<AppleIcon size={18} />} label="Apple" onPress={() => {}} />
-        </View>
-      </ScrollView>
+          {error && <Text style={styles.errorText}>{error}</Text>}
 
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>Não tem conta? </Text>
-        <Pressable onPress={() => router.push('/register')}>
-          <Text style={styles.footerLink}>Criar conta</Text>
-        </Pressable>
-      </View>
+          <Divider />
+
+          <View style={styles.socialRow}>
+            <View style={styles.socialButtonCell}>
+              <Button
+                variant="social"
+                icon={<GoogleIcon size={18} />}
+                label="Google"
+                fullWidth
+                onPress={() => {}}
+              />
+            </View>
+            <View style={styles.socialButtonCell}>
+              <Button
+                variant="social"
+                icon={<AppleIcon size={18} />}
+                label="Apple"
+                fullWidth
+                onPress={() => {}}
+              />
+            </View>
+          </View>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Não tem conta? </Text>
+            <Pressable onPress={() => router.push('/register')}>
+              <Text style={styles.footerLink}>Criar conta</Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -107,6 +155,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#060a14',
+  },
+  flex: {
+    flex: 1,
   },
   header: {
     paddingHorizontal: 24,
@@ -118,6 +169,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingTop: 16,
     zIndex: 10,
+  },
+  bodyContent: {
+    paddingBottom: 20,
   },
   title: {
     fontSize: 25,
@@ -153,15 +207,18 @@ const styles = StyleSheet.create({
   socialRow: {
     flexDirection: 'row',
     gap: 12,
+    alignSelf: 'stretch',
+  },
+  socialButtonCell: {
+    flex: 1,
+    minWidth: 0,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 30,
-    paddingBottom: 38,
-    zIndex: 10,
+    paddingTop: 20,
+    paddingBottom: 14,
   },
   footerText: {
     fontSize: 14,

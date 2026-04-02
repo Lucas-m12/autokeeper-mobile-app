@@ -1,6 +1,8 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import {
   type KeyboardTypeOptions,
+  type ReturnKeyTypeOptions,
+  type TextInput as RNTextInputType,
   Pressable,
   StyleSheet,
   Text,
@@ -16,11 +18,15 @@ interface TextInputProps {
   placeholder: string;
   value: string;
   onChangeText: (text: string) => void;
+  onBlur?: () => void;
   icon?: ReactNode;
   secureTextEntry?: boolean;
   error?: string;
   keyboardType?: KeyboardTypeOptions;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  returnKeyType?: ReturnKeyTypeOptions;
+  onSubmitEditing?: () => void;
+  submitBehavior?: 'blurAndSubmit' | 'submit' | 'newline';
 }
 
 function EyeIcon({ visible }: { visible: boolean }) {
@@ -65,61 +71,89 @@ function EyeIcon({ visible }: { visible: boolean }) {
   );
 }
 
-export function TextInput({
-  label,
-  placeholder,
-  value,
-  onChangeText,
-  icon,
-  secureTextEntry = false,
-  error,
-  keyboardType,
-  autoCapitalize,
-}: TextInputProps) {
-  const [isFocused, setIsFocused] = useState(false);
-  const [passwordVisible, setPasswordVisible] = useState(false);
+export const TextInput = forwardRef<RNTextInputType, TextInputProps>(
+  function TextInput(
+    {
+      label,
+      placeholder,
+      value,
+      onChangeText,
+      onBlur,
+      icon,
+      secureTextEntry = false,
+      error,
+      keyboardType,
+      autoCapitalize,
+      returnKeyType,
+      onSubmitEditing,
+      submitBehavior,
+    },
+    ref,
+  ) {
+    const innerRef = useRef<RNTextInputType>(null);
+    useImperativeHandle(ref, () => innerRef.current!);
 
-  const hasIcon = !!icon;
-  const hasError = !!error;
+    const [isFocused, setIsFocused] = useState(false);
+    const [passwordVisible, setPasswordVisible] = useState(false);
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
-      <View
-        style={[
-          styles.inputContainer,
-          isFocused && styles.inputContainerFocused,
-          hasError && styles.inputContainerError,
-        ]}
-      >
-        {hasIcon && <View style={styles.iconContainer}>{icon}</View>}
-        <RNTextInput
-          style={[styles.input, hasIcon ? styles.inputWithIcon : styles.inputWithoutIcon]}
-          placeholder={placeholder}
-          placeholderTextColor={colors.text.placeholder}
-          value={value}
-          onChangeText={onChangeText}
-          secureTextEntry={secureTextEntry && !passwordVisible}
-          keyboardType={keyboardType}
-          autoCapitalize={autoCapitalize}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-        />
-        {secureTextEntry && (
-          <Pressable
-            onPress={() => setPasswordVisible((prev) => !prev)}
-            style={styles.eyeButton}
-          >
-            <View style={styles.eyeIconWrapper}>
-              <EyeIcon visible={passwordVisible} />
+    const hasIcon = !!icon;
+    const hasError = !!error;
+
+    return (
+      <View style={styles.container}>
+        <Text style={styles.label}>{label}</Text>
+        <Pressable
+          onPress={() => innerRef.current?.focus()}
+          style={[
+            styles.inputContainer,
+            isFocused && styles.inputContainerFocused,
+            hasError && styles.inputContainerError,
+          ]}
+        >
+          {hasIcon && (
+            <View style={styles.iconContainer} pointerEvents="none">
+              {icon}
             </View>
-          </Pressable>
-        )}
+          )}
+          <RNTextInput
+            ref={innerRef}
+            style={[
+              styles.input,
+              !hasIcon && styles.inputWithoutIcon,
+              !secureTextEntry && styles.inputWithoutEye,
+            ]}
+            placeholder={placeholder}
+            placeholderTextColor={colors.text.placeholder}
+            value={value}
+            onChangeText={onChangeText}
+            secureTextEntry={secureTextEntry && !passwordVisible}
+            keyboardType={keyboardType}
+            autoCapitalize={autoCapitalize}
+            returnKeyType={returnKeyType}
+            onSubmitEditing={onSubmitEditing}
+            submitBehavior={submitBehavior}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => {
+              setIsFocused(false);
+              onBlur?.();
+            }}
+          />
+          {secureTextEntry && (
+            <Pressable
+              onPress={() => setPasswordVisible((prev) => !prev)}
+              style={styles.eyeButton}
+            >
+              <View style={styles.eyeIconWrapper}>
+                <EyeIcon visible={passwordVisible} />
+              </View>
+            </Pressable>
+          )}
+        </Pressable>
+        {hasError && <Text style={styles.errorText}>{error}</Text>}
       </View>
-      {hasError && <Text style={styles.errorText}>{error}</Text>}
-    </View>
-  );
-}
+    );
+  },
+);
 
 const styles = StyleSheet.create({
   container: {
@@ -155,11 +189,9 @@ const styles = StyleSheet.create({
     borderColor: colors.status.error,
   },
   iconContainer: {
-    position: 'absolute',
-    left: 14,
+    paddingLeft: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 1,
   },
   input: {
     flex: 1,
@@ -167,17 +199,16 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '400',
     color: colors.text.primary,
-    paddingRight: 14,
-  },
-  inputWithIcon: {
-    paddingLeft: 44,
+    paddingLeft: 10,
   },
   inputWithoutIcon: {
     paddingLeft: 14,
   },
+  inputWithoutEye: {
+    paddingRight: 14,
+  },
   eyeButton: {
-    position: 'absolute',
-    right: 14,
+    paddingHorizontal: 12,
     justifyContent: 'center',
     alignItems: 'center',
     height: '100%',

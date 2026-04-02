@@ -1,7 +1,17 @@
-import { View, Text, StyleSheet, StatusBar, Pressable } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  StatusBar,
+  Pressable,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Svg, { Rect, Path, Circle } from 'react-native-svg';
+import { Controller } from 'react-hook-form';
 import { Button } from '@/components/button';
 import { PhoneInput } from '@/features/auth/components/phone-input';
 import { AmbientGlow, GaugeArc } from '@/features/auth/components/auth-decorations';
@@ -10,10 +20,7 @@ import { useForgotPassword } from '@/features/auth/hooks/use-forgot-password';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
-  const { phone, setPhone, isLoading, error, handleSendCode } =
-    useForgotPassword();
-
-  const isPhoneError = error?.includes('Número');
+  const { form, handleSendCode, isLoading } = useForgotPassword();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -23,74 +30,89 @@ export default function ForgotPasswordScreen() {
       <AmbientGlow variant="teal" />
       <GaugeArc screen="forgot" />
 
-      <View style={styles.header}>
-        <Button variant="back" onPress={() => router.back()} />
-      </View>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={styles.header}>
+          <Button variant="back" onPress={() => router.back()} />
+        </View>
 
-      <View style={styles.body}>
-        <AuthIcon variant="amber">
-          <Svg width={22} height={22} viewBox="0 0 24 24">
-            <Rect
-              x={3}
-              y={11}
-              width={18}
-              height={11}
-              rx={2}
-              stroke="#e8a838"
-              strokeWidth={2}
-              fill="none"
-            />
-            <Path
-              d="M7 11V7a5 5 0 0110 0v4"
-              stroke="#e8a838"
-              strokeWidth={2}
-              fill="none"
-              strokeLinecap="round"
-            />
-            <Circle
-              cx={12}
-              cy={15}
-              r={1}
-              stroke="#e8a838"
-              strokeWidth={2}
-              fill="none"
-            />
-          </Svg>
-        </AuthIcon>
+        <ScrollView
+          style={styles.body}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          contentContainerStyle={styles.bodyContent}
+        >
+          <AuthIcon variant="amber">
+            <Svg width={22} height={22} viewBox="0 0 24 24">
+              <Rect
+                x={3}
+                y={11}
+                width={18}
+                height={11}
+                rx={2}
+                stroke="#e8a838"
+                strokeWidth={2}
+                fill="none"
+              />
+              <Path
+                d="M7 11V7a5 5 0 0110 0v4"
+                stroke="#e8a838"
+                strokeWidth={2}
+                fill="none"
+                strokeLinecap="round"
+              />
+              <Circle
+                cx={12}
+                cy={15}
+                r={1}
+                stroke="#e8a838"
+                strokeWidth={2}
+                fill="none"
+              />
+            </Svg>
+          </AuthIcon>
 
-        <Text style={styles.title}>Esqueceu a senha?</Text>
-        <Text style={styles.subtitle}>
-          Sem problemas! Digite seu número de celular e enviaremos um código para
-          redefinir sua senha.
-        </Text>
+          <Text style={styles.title}>Esqueceu a senha?</Text>
+          <Text style={styles.subtitle}>
+            Sem problemas! Digite seu número de celular e enviaremos um código para
+            redefinir sua senha.
+          </Text>
 
-        <PhoneInput
-          label="CELULAR CADASTRADO"
-          value={phone}
-          onChangeText={setPhone}
-          error={isPhoneError ? error ?? undefined : undefined}
-        />
-
-        <View style={styles.button}>
-          <Button
-            variant="primary"
-            label="Enviar código"
-            onPress={handleSendCode}
-            loading={isLoading}
+          <Controller
+            control={form.control}
+            name="phone"
+            render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+              <PhoneInput
+                label="CELULAR CADASTRADO"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={error?.message}
+                returnKeyType="done"
+                onSubmitEditing={handleSendCode}
+              />
+            )}
           />
-        </View>
 
-        {error && !isPhoneError && (
-          <Text style={styles.generalError}>{error}</Text>
-        )}
+          <View style={styles.button}>
+            <Button
+              variant="primary"
+              label="Enviar código"
+              onPress={handleSendCode}
+              loading={isLoading}
+            />
+          </View>
 
-        <View style={styles.helpRow}>
-          <Text style={styles.helpText}>Lembrou a senha? </Text>
-          <Pressable onPress={() => router.push('/login')}>
-            <Text style={styles.helpLink}>Voltar ao login</Text>
-          </Pressable>
-        </View>
-      </View>
+          <View style={styles.helpRow}>
+            <Text style={styles.helpText}>Lembrou a senha? </Text>
+            <Pressable onPress={() => router.push('/login')}>
+              <Text style={styles.helpLink}>Voltar ao login</Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -100,6 +122,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#060a14',
   },
+  flex: {
+    flex: 1,
+  },
   header: {
     paddingHorizontal: 24,
     paddingTop: 8,
@@ -107,6 +132,9 @@ const styles = StyleSheet.create({
   body: {
     paddingHorizontal: 30,
     paddingTop: 16,
+  },
+  bodyContent: {
+    paddingBottom: 20,
   },
   title: {
     fontSize: 25,
@@ -123,12 +151,6 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 10,
-  },
-  generalError: {
-    fontSize: 13,
-    color: '#f43f5e',
-    textAlign: 'center',
-    marginTop: 12,
   },
   helpRow: {
     flexDirection: 'row',

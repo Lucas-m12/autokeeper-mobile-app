@@ -1,66 +1,40 @@
 import { useState, useCallback } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuthStore } from '@/stores/auth-store';
 import { getErrorMessage } from '@/features/auth/utils/error-messages';
-
-interface FieldErrors {
-  password?: string;
-  confirmPassword?: string;
-}
+import { newPasswordSchema, type NewPasswordFormData } from '@/features/auth/schemas';
 
 export function useNewPassword() {
   const router = useRouter();
   const { resetToken } = useLocalSearchParams<{ resetToken: string }>();
   const authStore = useAuthStore();
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
-  const handlePasswordChange = useCallback((value: string) => {
-    setPassword(value);
-    setFieldErrors((prev) => ({ ...prev, password: undefined }));
-  }, []);
+  const form = useForm<NewPasswordFormData>({
+    resolver: zodResolver(newPasswordSchema),
+    defaultValues: { password: '', confirmPassword: '' },
+  });
 
-  const handleConfirmPasswordChange = useCallback((value: string) => {
-    setConfirmPassword(value);
-    setFieldErrors((prev) => ({ ...prev, confirmPassword: undefined }));
-  }, []);
-
-  const handleReset = useCallback(async () => {
-    const errors: FieldErrors = {};
-
-    if (!/^(?=.*[a-zA-Z])(?=.*\d).{8,128}$/.test(password)) {
-      errors.password = 'Mínimo 8 caracteres com letras e números.';
-    }
-
-    if (confirmPassword !== password) {
-      errors.confirmPassword = 'As senhas não conferem.';
-    }
-
-    if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await authStore.resetPassword(resetToken!, password);
-      router.replace('/password-reset-success');
-    } catch (e) {
-      setFieldErrors({ password: getErrorMessage(e) });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [password, confirmPassword, resetToken, authStore, router]);
+  const onSubmit = useCallback(
+    async (data: NewPasswordFormData) => {
+      setIsLoading(true);
+      try {
+        await authStore.resetPassword(resetToken!, data.password);
+        router.replace('/password-reset-success');
+      } catch (e) {
+        form.setError('password', { message: getErrorMessage(e) });
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [resetToken, authStore, router, form],
+  );
 
   return {
-    password,
-    setPassword: handlePasswordChange,
-    confirmPassword,
-    setConfirmPassword: handleConfirmPasswordChange,
+    form,
+    handleReset: form.handleSubmit(onSubmit),
     isLoading,
-    fieldErrors,
-    handleReset,
   };
 }

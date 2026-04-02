@@ -1,61 +1,92 @@
-import { useState, useCallback } from 'react';
-import { StyleSheet, View, Text, TextInput } from 'react-native';
+import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react';
+import {
+  type ReturnKeyTypeOptions,
+  type TextInput as RNTextInputType,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
 import { maskPhone, unmaskPhone } from '../utils/phone-mask';
 
 type Props = {
   value: string;
   onChangeText: (unmasked: string) => void;
+  onBlur?: () => void;
   error?: string;
   label?: string;
+  returnKeyType?: ReturnKeyTypeOptions;
+  onSubmitEditing?: () => void;
+  submitBehavior?: 'blurAndSubmit' | 'submit' | 'newline';
 };
 
-export function PhoneInput({
-  value,
-  onChangeText,
-  error,
-  label = 'CELULAR',
-}: Props) {
-  const [focused, setFocused] = useState(false);
-
-  const handleChange = useCallback(
-    (text: string) => {
-      const digits = unmaskPhone(text).slice(0, 11);
-      onChangeText(digits);
+export const PhoneInput = forwardRef<RNTextInputType, Props>(
+  function PhoneInput(
+    {
+      value,
+      onChangeText,
+      onBlur,
+      error,
+      label = 'CELULAR',
+      returnKeyType,
+      onSubmitEditing,
+      submitBehavior,
     },
-    [onChangeText],
-  );
+    ref,
+  ) {
+    const innerRef = useRef<RNTextInputType>(null);
+    useImperativeHandle(ref, () => innerRef.current!);
 
-  const borderStyle = error
-    ? styles.errorBorder
-    : focused
-      ? styles.focusBorder
-      : undefined;
+    const [focused, setFocused] = useState(false);
 
-  return (
-    <View style={styles.container}>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
-      <View style={styles.row}>
-        <View style={[styles.countryCode, borderStyle]}>
-          <Text style={styles.flag}>🇧🇷</Text>
-          <Text style={styles.code}>+55</Text>
-        </View>
-        <TextInput
-          style={[styles.input, borderStyle]}
-          value={maskPhone(value)}
-          onChangeText={handleChange}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          placeholder="(11) 98765-4321"
-          placeholderTextColor="#3d5068"
-          keyboardType="phone-pad"
-          maxLength={16}
-        />
+    const handleChange = useCallback(
+      (text: string) => {
+        const digits = unmaskPhone(text).slice(0, 11);
+        onChangeText(digits);
+      },
+      [onChangeText],
+    );
+
+    const borderStyle = error
+      ? styles.errorBorder
+      : focused
+        ? styles.focusBorder
+        : undefined;
+
+    return (
+      <View style={styles.container}>
+        {label ? <Text style={styles.label}>{label}</Text> : null}
+        <Pressable style={styles.row} onPress={() => innerRef.current?.focus()}>
+          <View style={[styles.countryCode, borderStyle]} pointerEvents="none">
+            <Text style={styles.flag}>🇧🇷</Text>
+            <Text style={styles.code}>+55</Text>
+          </View>
+          <TextInput
+            ref={innerRef}
+            style={[styles.input, borderStyle]}
+            value={maskPhone(value)}
+            onChangeText={handleChange}
+            onFocus={() => setFocused(true)}
+            onBlur={() => {
+              setFocused(false);
+              onBlur?.();
+            }}
+            placeholder="(11) 98765-4321"
+            placeholderTextColor="#3d5068"
+            keyboardType="phone-pad"
+            maxLength={16}
+            returnKeyType={returnKeyType}
+            onSubmitEditing={onSubmitEditing}
+            submitBehavior={submitBehavior}
+          />
+        </Pressable>
+        {error ? <Text style={styles.error}>{error}</Text> : null}
       </View>
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-    </View>
-  );
-}
+    );
+  },
+);
 
 const styles = StyleSheet.create({
   container: {
@@ -96,7 +127,6 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: 50,
-    paddingHorizontal: 14,
     backgroundColor: '#0f1a2e',
     borderWidth: 1.5,
     borderColor: 'rgba(136,153,174,0.15)',

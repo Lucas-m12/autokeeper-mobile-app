@@ -49,13 +49,14 @@ export default function PasswordResetSuccessScreen() {
           senha.
         </Text>
 
-        <Button
-          variant="primary"
-          label="Ir para o login"
-          icon={<LoginArrowIcon />}
-          onPress={() => router.replace('/login')}
-          style={styles.button}
-        />
+        <View style={styles.button}>
+          <Button
+            variant="primary"
+            label="Ir para o login"
+            icon={<LoginArrowIcon />}
+            onPress={() => router.replace('/login')}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );

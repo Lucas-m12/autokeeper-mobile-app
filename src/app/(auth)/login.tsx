@@ -69,7 +69,7 @@ export default function LoginScreen() {
           <Checkbox
             label="Lembrar de mim"
             checked={rememberMe}
-            onPress={toggleRemember}
+            onToggle={toggleRemember}
           />
           <Pressable onPress={() => router.push('/forgot-password')}>
             <Text style={styles.forgotLink}>Esqueceu a senha?</Text>
@@ -77,18 +77,19 @@ export default function LoginScreen() {
         </View>
 
         <Button
+          variant="primary"
           label="Entrar"
           onPress={handleLogin}
-          isLoading={isLoading}
+          loading={isLoading}
         />
 
         {error && <Text style={styles.errorText}>{error}</Text>}
 
-        <Divider label="ou" />
+        <Divider />
 
         <View style={styles.socialRow}>
-          <Button variant="social" icon={<GoogleIcon size={18} />} label="Google" />
-          <Button variant="social" icon={<AppleIcon size={18} />} label="Apple" />
+          <Button variant="social" icon={<GoogleIcon size={18} />} label="Google" onPress={() => {}} />
+          <Button variant="social" icon={<AppleIcon size={18} />} label="Apple" onPress={() => {}} />
         </View>
       </ScrollView>
 

@@ -85,12 +85,14 @@ export default function RegisterScreen() {
           error={fieldErrors.confirmPassword}
         />
 
-        <Button
-          label="Criar conta"
-          onPress={handleRegister}
-          isLoading={isLoading}
-          style={styles.submitButton}
-        />
+        <View style={styles.submitButton}>
+          <Button
+            variant="primary"
+            label="Criar conta"
+            onPress={handleRegister}
+            loading={isLoading}
+          />
+        </View>
 
         <Text style={styles.termsText}>
           Ao criar uma conta, você concorda com os{'\n'}

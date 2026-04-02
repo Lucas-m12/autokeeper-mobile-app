@@ -31,12 +31,14 @@ export default function RegisterSuccessScreen() {
           inteligentes.
         </Text>
 
-        <Button
-          label="Adicionar meu veículo"
-          icon={<PlusIcon size={18} />}
-          onPress={() => router.replace('/(tabs)')}
-          style={styles.primaryButton}
-        />
+        <View style={styles.primaryButton}>
+          <Button
+            variant="primary"
+            label="Adicionar meu veículo"
+            icon={<PlusIcon size={18} />}
+            onPress={() => router.replace('/(tabs)')}
+          />
+        </View>
 
         <Pressable onPress={() => router.replace('/(tabs)')}>
           <Text style={styles.skipText}>Fazer isso depois</Text>

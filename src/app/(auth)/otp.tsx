@@ -56,14 +56,16 @@ export default function OtpScreen() {
         <Text style={styles.phoneDisplay}>{phone}</Text>
         <Text style={styles.hint}>Digite o código de 6 dígitos</Text>
 
-        <OtpInput value={code} onChange={handleCodeChange} />
+        <OtpInput value={code} onChangeText={handleCodeChange} />
 
-        <Button
-          label="Verificar"
-          onPress={handleVerify}
-          isLoading={isLoading}
-          style={styles.verifyButton}
-        />
+        <View style={styles.verifyButton}>
+          <Button
+            variant="primary"
+            label="Verificar"
+            onPress={handleVerify}
+            loading={isLoading}
+          />
+        </View>
 
         {error && <Text style={styles.errorText}>{error}</Text>}
 

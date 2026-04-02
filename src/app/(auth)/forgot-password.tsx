@@ -71,13 +71,14 @@ export default function ForgotPasswordScreen() {
           error={isPhoneError ? error : undefined}
         />
 
-        <Button
-          variant="primary"
-          label="Enviar código"
-          onPress={handleSendCode}
-          loading={isLoading}
-          style={styles.button}
-        />
+        <View style={styles.button}>
+          <Button
+            variant="primary"
+            label="Enviar código"
+            onPress={handleSendCode}
+            loading={isLoading}
+          />
+        </View>
 
         {error && !isPhoneError && (
           <Text style={styles.generalError}>{error}</Text>

@@ -96,13 +96,14 @@ export default function NewPasswordScreen() {
           error={fieldErrors.confirmPassword}
         />
 
-        <Button
-          variant="primary"
-          label="Redefinir senha"
-          onPress={handleReset}
-          loading={isLoading}
-          style={styles.button}
-        />
+        <View style={styles.button}>
+          <Button
+            variant="primary"
+            label="Redefinir senha"
+            onPress={handleReset}
+            loading={isLoading}
+          />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

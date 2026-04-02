@@ -33,7 +33,7 @@ export function PhoneInput({
       : undefined;
 
   return (
-    <View>
+    <View style={styles.container}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
       <View style={styles.row}>
         <View style={[styles.countryCode, borderStyle]}>
@@ -58,6 +58,9 @@ export function PhoneInput({
 }
 
 const styles = StyleSheet.create({
+  container: {
+    marginBottom: 16,
+  },
   label: {
     fontSize: 11,
     fontWeight: '700',

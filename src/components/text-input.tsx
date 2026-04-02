@@ -83,7 +83,7 @@ export function TextInput({
   const hasError = !!error;
 
   return (
-    <View>
+    <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
       <View
         style={[
@@ -122,6 +122,9 @@ export function TextInput({
 }
 
 const styles = StyleSheet.create({
+  container: {
+    marginBottom: 16,
+  },
   label: {
     fontSize: 11,
     fontWeight: '700',

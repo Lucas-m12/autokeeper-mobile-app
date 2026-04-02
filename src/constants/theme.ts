@@ -66,17 +66,37 @@ export const radius = {
   full: 9999,
 } as const;
 
+const font = Platform.select({
+  ios: 'Avenir Next',
+  default: 'Montserrat_400Regular',
+});
+
+const fontBold = Platform.select({
+  ios: 'Avenir Next',
+  default: 'Montserrat_700Bold',
+});
+
+const fontSemiBold = Platform.select({
+  ios: 'Avenir Next',
+  default: 'Montserrat_600SemiBold',
+});
+
+const fontMedium = Platform.select({
+  ios: 'Avenir Next',
+  default: 'Montserrat_500Medium',
+});
+
 export const typography: Record<string, TextStyle> = {
-  display: { fontSize: 30, fontWeight: '700', lineHeight: 36, letterSpacing: -0.5 },
-  h1: { fontSize: 27, fontWeight: '700', lineHeight: 32.4, letterSpacing: -0.5 },
-  h2: { fontSize: 25, fontWeight: '700', lineHeight: 30, letterSpacing: -0.5 },
-  h3: { fontSize: 20, fontWeight: '700', lineHeight: 26, letterSpacing: -0.3 },
-  body: { fontSize: 15, fontWeight: '400', lineHeight: 24 },
-  button: { fontSize: 16, fontWeight: '600', lineHeight: 16 },
-  label: { fontSize: 11, fontWeight: '700', lineHeight: 15.4, letterSpacing: 0.8, textTransform: 'uppercase' },
-  caption: { fontSize: 13, fontWeight: '400', lineHeight: 19.5 },
-  small: { fontSize: 12, fontWeight: '400', lineHeight: 19.2 },
-  link: { fontSize: 14, fontWeight: '600', lineHeight: 21 },
+  display: { fontSize: 30, fontWeight: '700', lineHeight: 36, letterSpacing: -0.5, fontFamily: fontBold },
+  h1: { fontSize: 27, fontWeight: '700', lineHeight: 32.4, letterSpacing: -0.5, fontFamily: fontBold },
+  h2: { fontSize: 25, fontWeight: '700', lineHeight: 30, letterSpacing: -0.5, fontFamily: fontBold },
+  h3: { fontSize: 20, fontWeight: '700', lineHeight: 26, letterSpacing: -0.3, fontFamily: fontBold },
+  body: { fontSize: 15, fontWeight: '400', lineHeight: 24, fontFamily: font },
+  button: { fontSize: 16, fontWeight: '600', lineHeight: 16, fontFamily: fontSemiBold },
+  label: { fontSize: 11, fontWeight: '700', lineHeight: 15.4, letterSpacing: 0.8, textTransform: 'uppercase', fontFamily: fontBold },
+  caption: { fontSize: 13, fontWeight: '400', lineHeight: 19.5, fontFamily: font },
+  small: { fontSize: 12, fontWeight: '400', lineHeight: 19.2, fontFamily: font },
+  link: { fontSize: 14, fontWeight: '600', lineHeight: 21, fontFamily: fontSemiBold },
 };
 
 export const shadows = {
@@ -96,7 +116,4 @@ export const shadows = {
   },
 } as const;
 
-export const fontFamily = Platform.select({
-  ios: 'Avenir Next',
-  default: 'Montserrat',
-});
+export const fontFamily = font;
